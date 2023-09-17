@@ -31,4 +31,7 @@ projenv.Append(CPPDEFINES=[
     
     ("ENV_SERVICES_LIGHT_UUID", envstr(envfile["services.light"]["uuid"])),
     ("ENV_SERVICES_LIGHT_VALUE_UUID", envstr(envfile["services.light.value"]["uuid"])),
+    
+    ("ENV_SERVICES_DEBUG_UUID", envstr(envfile["services.debug"]["uuid"])),
+    ("ENV_SERVICES_DEBUG_FREE_HEAP_UUID", envstr(envfile["services.debug.free_heap"]["uuid"])),
 ])

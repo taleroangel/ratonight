@@ -35,4 +35,14 @@
 #error "Missing environment variable ENV_SERVICES_LIGHT_VALUE_UUID"
 #endif
 
+#ifndef ENV_SERVICES_DEBUG_UUID
+#define ENV_SERVICES_DEBUG_UUID "MISSING-ENV"
+#error "Missing environment variable ENV_SERVICES_DEBUG_UUID"
+#endif
+
+#ifndef ENV_SERVICES_DEBUG_FREE_HEAP_UUID
+#define ENV_SERVICES_DEBUG_FREE_HEAP_UUID "MISSING-ENV"
+#error "Missing environment variable ENV_SERVICES_DEBUG_FREE_HEAP_UUID"
+#endif
+
 #endif

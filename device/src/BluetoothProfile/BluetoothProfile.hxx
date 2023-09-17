@@ -51,11 +51,21 @@ namespace Bluetooth
 		std::unique_ptr<BLECharacteristic> light_value;
 		std::unique_ptr<BLE2904> light_value_description;
 
+#ifdef DEBUG
+		std::unique_ptr<BLEService> debug_service;
+		std::unique_ptr<BLECharacteristic> debug_free_heap;
+		std::unique_ptr<BLE2904> debug_free_heap_description;
+#endif
+
 	public:
 		Profile(std::unique_ptr<BLEServer> &);
 		void set_temperature_callback(BLECharacteristicCallbacks *);
 		void set_humidity_callback(BLECharacteristicCallbacks *);
 		void set_light_callback(BLECharacteristicCallbacks *);
+
+#ifdef DEBUG
+		void set_free_heap_callback(BLECharacteristicCallbacks *);
+#endif
 	};
 }
 

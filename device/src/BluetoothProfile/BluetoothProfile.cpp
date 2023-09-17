@@ -25,6 +25,15 @@ Profile::Profile(std::unique_ptr<BLEServer> &pServer)
 		  ENV_SERVICES_LIGHT_VALUE_UUID,
 		  BLECharacteristic::PROPERTY_WRITE)},
 	  light_value_description{new BLE2904()}
+
+#ifdef DEBUG
+	  ,
+	  debug_service{pServer->createService(ENV_SERVICES_DEBUG_UUID)},
+	  debug_free_heap{debug_service->createCharacteristic(
+		  ENV_SERVICES_DEBUG_FREE_HEAP_UUID,
+		  BLECharacteristic::PROPERTY_READ)},
+	  debug_free_heap_description{new BLE2904()}
+#endif
 {
 	/* -- 1. Ambience service -- */
 	// Start the service
@@ -47,6 +56,13 @@ Profile::Profile(std::unique_ptr<BLEServer> &pServer)
 	light_value_description->setUnit(NO_UNIT);
 	light_value_description->setFormat(BLE2904::FORMAT_UINT32);
 	light_value->addDescriptor(light_value_description.get());
+
+#ifdef DEBUG
+	debug_service->start();
+	debug_free_heap_description->setUnit(NO_UNIT);
+	debug_free_heap_description->setFormat(BLE2904::FORMAT_UINT32);
+	debug_free_heap->addDescriptor(debug_free_heap_description.get());
+#endif
 }
 
 void Profile::set_temperature_callback(BLECharacteristicCallbacks *callback)
@@ -63,3 +79,10 @@ void Profile::set_light_callback(BLECharacteristicCallbacks *callback)
 {
 	return this->light_value->setCallbacks(callback);
 }
+
+#ifdef DEBUG
+void Profile::set_free_heap_callback(BLECharacteristicCallbacks *callback)
+{
+	return this->debug_free_heap->setCallbacks(callback);
+}
+#endif

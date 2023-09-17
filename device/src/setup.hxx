@@ -15,6 +15,7 @@
 #include <BLEDevice.h>
 #include <BLEServer.h>
 #include <BLEAdvertising.h>
+#include <Preferences.h>
 #include <Ticker.h>
 #include <DHT.h>
 
@@ -26,10 +27,14 @@
 #include <memory>
 #include <cstdint>
 
+#define LIGHT_STORE_NAME "light"
+
 /* --------- Global Variables --------- */
 
 namespace Peripherals
 {
+	/// @brief Across reboots preferences
+	Preferences preferences;
 	/// @brief  DHT11 Sensor peripheral
 	DHT dht_sensor{GPIO_NUM_4, DHT11};
 	/// @brief	FastLED control of LEDs
@@ -50,18 +55,22 @@ namespace BluetoothCallback
 	 */
 	class OnServerCallback : public BLEServerCallbacks
 	{
-		void onConnect(BLEServer *pServer)
+		void onConnect(BLEServer *pServer) override
 		{
 #ifdef DEBUG
 			Logger.log<LoggingLevel::I>("BLE", "Device connected");
 #endif
 		};
 
-		void onDisconnect(BLEServer *pServer)
+		void onDisconnect(BLEServer *pServer) override
 		{
 			pServer->startAdvertising();
+			Peripherals::preferences.putULong(
+				LIGHT_STORE_NAME,
+				static_cast<uint32_t>(Peripherals::light_control.get_color()));
 #ifdef DEBUG
 			Logger.log<LoggingLevel::I>("BLE", "Device disconnected");
+			Logger.log<LoggingLevel::I>("PREFERENCES", "Stored new value");
 #endif
 		}
 	} on_server_callback;
@@ -71,7 +80,7 @@ namespace BluetoothCallback
 	 */
 	class OnAmbienceTemperatureCallback : public BLECharacteristicCallbacks
 	{
-		void onRead(BLECharacteristic *pCharacteristic)
+		void onRead(BLECharacteristic *pCharacteristic) override
 		{
 			float temperature = Peripherals::dht_sensor.readTemperature();
 			pCharacteristic->setValue(temperature);
@@ -87,7 +96,7 @@ namespace BluetoothCallback
 	 */
 	class OnAmbienceHumidityCallback : public BLECharacteristicCallbacks
 	{
-		void onRead(BLECharacteristic *pCharacteristic)
+		void onRead(BLECharacteristic *pCharacteristic) override
 		{
 			float humidity = Peripherals::dht_sensor.readHumidity();
 			pCharacteristic->setValue(humidity);
@@ -103,7 +112,7 @@ namespace BluetoothCallback
 	 */
 	class OnLightCallback : public BLECharacteristicCallbacks
 	{
-		void onWrite(BLECharacteristic *pCharacteristic)
+		void onWrite(BLECharacteristic *pCharacteristic) override
 		{
 			// Interpret the data into color
 			uint32_t data_value = 0U;
@@ -117,6 +126,21 @@ namespace BluetoothCallback
 			Peripherals::light_control.set_color(data_value);
 		}
 	} on_light_callback;
+
+#ifdef DEBUG
+	class OnDebugFreeHeapCallback : public BLECharacteristicCallbacks
+	{
+		void onRead(BLECharacteristic *pCharacteristic) override
+		{
+			// Read minimum free heap
+			uint32_t free_heap = ESP.getMinFreeHeap();
+			// Store the value
+			pCharacteristic->setValue(free_heap);
+			// Logger value
+			Logger.log<LoggingLevel::D>("MIN_FREE_HEAP", free_heap);
+		}
+	} on_debug_free_heap_callback;
+#endif
 }
 
 #endif

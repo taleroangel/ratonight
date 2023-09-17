@@ -6,15 +6,15 @@
 #include <cstdint>
 #include <cstring>
 
-#define LED_TYPE WS2812
-#define N_LEDS 7
+#define LIGHT_CONTROLLER_N_LIGHTS 7U
+#define INIT_VALUE 0x80000080U
 
 template <const uint8_t led_pin>
 class LightController
 {
 public:
 	/** Number of leds in strip constant */
-	static constexpr uint8_t n_leds = N_LEDS;
+	static constexpr uint8_t n_leds = LIGHT_CONTROLLER_N_LIGHTS;
 
 	/**
 	 * LED strip selection bit mask
@@ -77,7 +77,12 @@ public:
 
 	inline hsv_color_int_type get_color() const
 	{
-		return static_cast<hsv_color_int_type>(current_color);
+		union _
+		{
+			hsv_color_int_type int_type;
+			hsv_color color_type;
+		} transform{.color_type = current_color};
+		return transform.int_type;
 	}
 };
 

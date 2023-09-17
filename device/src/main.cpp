@@ -6,11 +6,15 @@ void setup()
 #ifdef DEBUG
 	Serial.begin(SERIAL_BAUD_RATE);
 	Logger.begin(&Serial, LoggingLevel::ALL);
-	Logger.log<LoggingLevel::I>("Logger", "Logger is Running (DEBUG is ON)");
+	Logger.log<LoggingLevel::I>("LOGGER", "Logger is Running (DEBUG is ON)");
 #endif
 	/* 0. Peripheral initialization */
+	// Initialize the memory
+	Peripherals::preferences.begin(ENV_DEVICE_NAME);
 	// Initialize DHT11 Peripheral
 	Peripherals::dht_sensor.begin();
+	Peripherals::light_control.set_color(
+		Peripherals::preferences.getULong(LIGHT_STORE_NAME, INIT_VALUE));
 
 	/* 1. BLE Initialization */
 	// Initialize the Bluetooth device
@@ -25,6 +29,10 @@ void setup()
 	Bluetooth::profile->set_temperature_callback(&BluetoothCallback::on_ambience_temperature_callback);
 	Bluetooth::profile->set_humidity_callback(&BluetoothCallback::on_ambience_humidity_callback);
 	Bluetooth::profile->set_light_callback(&BluetoothCallback::on_light_callback);
+#ifdef DEBUG
+	Bluetooth::profile->set_free_heap_callback(&BluetoothCallback::on_debug_free_heap_callback);
+	Logger.log<LoggingLevel::D>("SETUP", "FREE_HEAP debug property callback initialized");
+#endif
 
 	// Create the advertiser
 	Bluetooth::advertising = std::unique_ptr<BLEAdvertising>{BLEDevice::getAdvertising()};
