@@ -1,0 +1,47 @@
+import 'package:awesome_flutter_extensions/awesome_flutter_extensions.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:ratonight/widgets/bluetooth_icon.dart';
+
+class BluetoothAlertScreen extends StatelessWidget {
+  const BluetoothAlertScreen(
+      {required this.text,
+      this.state = BluetoothAdapterState.unknown,
+      this.actions = const [],
+      super.key});
+  final String text;
+  final BluetoothAdapterState state;
+  final List<Widget> actions;
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(64.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                BluetoothIcon(
+                  size: 42.0,
+                  state: state,
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(
+                    text,
+                    style: context.themes.text.displaySmall,
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                const SizedBox.square(
+                  dimension: 24.0,
+                ),
+                ...actions
+              ],
+            ),
+          ),
+        ),
+      );
+}
