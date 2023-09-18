@@ -31,8 +31,10 @@ projenv.Append(CPPDEFINES=[
     ("ENV_SERVICES_AMBIENCE_HUMIDITY_UUID", envstr(envfile["services.ambience.humidity"]["uuid"])),
     
     ("ENV_SERVICES_LIGHT_UUID", envstr(envfile["services.light"]["uuid"])),
-    ("ENV_SERVICES_LIGHT_VALUE_UUID", envstr(envfile["services.light.value"]["uuid"])),
+    ("ENV_SERVICES_LIGHT_PUSH_UUID", envstr(envfile["services.light.push"]["uuid"])),
+    ("ENV_SERVICES_LIGHT_PULL_UUID", envstr(envfile["services.light.pull"]["uuid"])),
     
     ("ENV_SERVICES_DEBUG_UUID", envstr(envfile["services.debug"]["uuid"])),
     ("ENV_SERVICES_DEBUG_FREE_HEAP_UUID", envstr(envfile["services.debug.free_heap"]["uuid"])),
+    ("ENV_SERVICES_DEBUG_MIN_HEAP_UUID", envstr(envfile["services.debug.min_heap"]["uuid"])),
 ])

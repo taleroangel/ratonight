@@ -35,9 +35,14 @@
 #error "Missing environment variable ENV_SERVICES_LIGHT_UUID"
 #endif
 
-#ifndef ENV_SERVICES_LIGHT_VALUE_UUID
-#define ENV_SERVICES_LIGHT_VALUE_UUID "MISSING-ENV"
-#error "Missing environment variable ENV_SERVICES_LIGHT_VALUE_UUID"
+#ifndef ENV_SERVICES_LIGHT_PUSH_UUID
+#define ENV_SERVICES_LIGHT_PUSH_UUID "MISSING-ENV"
+#error "Missing environment variable ENV_SERVICES_LIGHT_PUSH_UUID"
+#endif
+
+#ifndef ENV_SERVICES_LIGHT_PULL_UUID
+#define ENV_SERVICES_LIGHT_PULL_UUID "MISSING-ENV"
+#error "Missing environment variable ENV_SERVICES_LIGHT_PULL_UUID"
 #endif
 
 #ifndef ENV_SERVICES_DEBUG_UUID
@@ -48,6 +53,11 @@
 #ifndef ENV_SERVICES_DEBUG_FREE_HEAP_UUID
 #define ENV_SERVICES_DEBUG_FREE_HEAP_UUID "MISSING-ENV"
 #error "Missing environment variable ENV_SERVICES_DEBUG_FREE_HEAP_UUID"
+#endif
+
+#ifndef ENV_SERVICES_DEBUG_MIN_HEAP_UUID
+#define ENV_SERVICES_DEBUG_MIN_HEAP_UUID "MISSING-ENV"
+#error "Missing environment variable ENV_SERVICES_DEBUG_MIN_HEAP_UUID"
 #endif
 
 #endif

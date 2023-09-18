@@ -28,10 +28,12 @@ void setup()
 	Bluetooth::profile = std::unique_ptr<Bluetooth::Profile>{new Bluetooth::Profile{Bluetooth::server}};
 	Bluetooth::profile->set_temperature_callback(&BluetoothCallback::on_ambience_temperature_callback);
 	Bluetooth::profile->set_humidity_callback(&BluetoothCallback::on_ambience_humidity_callback);
-	Bluetooth::profile->set_light_callback(&BluetoothCallback::on_light_callback);
+	Bluetooth::profile->set_light_push_callback(&BluetoothCallback::on_light_push_callback);
+	Bluetooth::profile->set_light_pull_callback(&BluetoothCallback::on_light_pull_callback);
 #ifdef DEBUG
 	Bluetooth::profile->set_free_heap_callback(&BluetoothCallback::on_debug_free_heap_callback);
-	Logger.log<LoggingLevel::D>("SETUP", "FREE_HEAP debug property callback initialized");
+	Bluetooth::profile->set_min_heap_callback(&BluetoothCallback::on_debug_min_heap_callback);
+	Logger.log<LoggingLevel::D>("SETUP", "DEBUG property callback initialized");
 #endif
 	// Fill advertising data
 	// Create the advertiser

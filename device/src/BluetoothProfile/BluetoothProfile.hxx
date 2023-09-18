@@ -48,23 +48,33 @@ namespace Bluetooth
 		 * The light service will be reponsible for managing light control
 		 */
 		std::unique_ptr<BLEService> light_service;
-		std::unique_ptr<BLECharacteristic> light_value;
-		std::unique_ptr<BLE2904> light_value_description;
+
+		std::unique_ptr<BLECharacteristic> light_push;
+		std::unique_ptr<BLE2904> light_push_description;
+
+		std::unique_ptr<BLECharacteristic> light_pull;
+		std::unique_ptr<BLE2904> light_pull_description;
 
 #ifdef DEBUG
 		std::unique_ptr<BLEService> debug_service;
+
 		std::unique_ptr<BLECharacteristic> debug_free_heap;
 		std::unique_ptr<BLE2904> debug_free_heap_description;
+
+		std::unique_ptr<BLECharacteristic> debug_min_heap;
+		std::unique_ptr<BLE2904> debug_min_heap_description;
 #endif
 
 	public:
 		Profile(std::unique_ptr<BLEServer> &);
 		void set_temperature_callback(BLECharacteristicCallbacks *);
 		void set_humidity_callback(BLECharacteristicCallbacks *);
-		void set_light_callback(BLECharacteristicCallbacks *);
+		void set_light_push_callback(BLECharacteristicCallbacks *);
+		void set_light_pull_callback(BLECharacteristicCallbacks *);
 
 #ifdef DEBUG
 		void set_free_heap_callback(BLECharacteristicCallbacks *);
+		void set_min_heap_callback(BLECharacteristicCallbacks *);
 #endif
 	};
 }

@@ -65,12 +65,8 @@ namespace BluetoothCallback
 		void onDisconnect(BLEServer *pServer) override
 		{
 			pServer->startAdvertising();
-			Peripherals::preferences.putULong(
-				LIGHT_STORE_NAME,
-				static_cast<uint32_t>(Peripherals::light_control.get_color()));
 #ifdef DEBUG
 			Logger.log<LoggingLevel::I>("BLE", "Device disconnected");
-			Logger.log<LoggingLevel::I>("PREFERENCES", "Stored new value");
 #endif
 		}
 	} on_server_callback;
@@ -110,7 +106,7 @@ namespace BluetoothCallback
 	/**
 	 * Callback to call when a Light value is pushed
 	 */
-	class OnLightCallback : public BLECharacteristicCallbacks
+	class OnLightPushCallback : public BLECharacteristicCallbacks
 	{
 		void onWrite(BLECharacteristic *pCharacteristic) override
 		{
@@ -121,11 +117,34 @@ namespace BluetoothCallback
 #ifdef DEBUG
 			Logger.log<LoggingLevel::D>("LIGHT", "Pushed value");
 			Logger.log<LoggingLevel::I>("LIGHT", data_value);
+			Logger.log<LoggingLevel::I>("PREFERENCES", "Stored new value");
 #endif
+			// Store the new value
+			Peripherals::preferences.putULong(
+				LIGHT_STORE_NAME,
+				static_cast<uint32_t>(data_value));
+
 			// Set the color data
 			Peripherals::light_control.set_color(data_value);
 		}
-	} on_light_callback;
+	} on_light_push_callback;
+
+	/**
+	 * Callback to call when a Light value is pulled
+	 */
+	class OnLightPullCallback : public BLECharacteristicCallbacks
+	{
+		void onRead(BLECharacteristic *pCharacteristic) override
+		{
+			// Grab the color
+			uint32_t colors = Peripherals::light_control.get_color();
+#ifdef DEBUG
+			Logger.log<LoggingLevel::D>("LIGHT", "Pulled value");
+#endif
+			// Set the color data
+			pCharacteristic->setValue(colors);
+		}
+	} on_light_pull_callback;
 
 #ifdef DEBUG
 	class OnDebugFreeHeapCallback : public BLECharacteristicCallbacks
@@ -133,13 +152,26 @@ namespace BluetoothCallback
 		void onRead(BLECharacteristic *pCharacteristic) override
 		{
 			// Read minimum free heap
-			uint32_t free_heap = ESP.getMinFreeHeap();
+			uint32_t free_heap = ESP.getFreeHeap();
 			// Store the value
 			pCharacteristic->setValue(free_heap);
 			// Logger value
-			Logger.log<LoggingLevel::D>("MIN_FREE_HEAP", free_heap);
+			Logger.log<LoggingLevel::D>("FREE_HEAP", free_heap);
 		}
 	} on_debug_free_heap_callback;
+
+	class OnDebugMinHeapCallback : public BLECharacteristicCallbacks
+	{
+		void onRead(BLECharacteristic *pCharacteristic) override
+		{
+			// Read minimum free heap
+			uint32_t min_heap = ESP.getMinFreeHeap();
+			// Store the value
+			pCharacteristic->setValue(min_heap);
+			// Logger value
+			Logger.log<LoggingLevel::D>("MIN_HEAP", min_heap);
+		}
+	} on_debug_min_heap_callback;
 #endif
 }
 
