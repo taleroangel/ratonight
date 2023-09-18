@@ -46,6 +46,12 @@ class _DeviceSelectionScreenState extends State<DeviceSelectionScreen> {
                   (a, b) => (-1) * a.rssi.compareTo(b.rssi),
                 );
 
+              if (devices.isEmpty) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+
               // Build list of devices
               return ListView.separated(
                 itemCount: devices.length,

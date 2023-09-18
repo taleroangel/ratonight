@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:awesome_flutter_extensions/awesome_flutter_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:get_it/get_it.dart';
@@ -8,6 +9,8 @@ import 'package:provider/provider.dart';
 import 'package:ratonight/environment.g.dart';
 import 'package:ratonight/provider/device_connection_provider.dart';
 import 'package:ratonight/tools/parset_float_bytes.dart';
+import 'package:ratonight/widgets/ambient_animation.dart';
+import 'package:ratonight/widgets/ambient_charasteristic_tile.dart';
 
 class AmbientServiceScreen extends StatefulWidget {
   const AmbientServiceScreen({super.key});
@@ -38,9 +41,11 @@ class _AmbientServiceScreenState extends State<AmbientServiceScreen> {
     GetIt.I
         .get<Logger>()
         .d("Temperature: $temperatureValues\nHumidity: $humidityValues");
-    // Parse float bytes into double
-    temperature = parseFloatBytes(temperatureValues);
-    humidity = parseFloatBytes(humidityValues);
+    // Parse float bytes into double and set the state
+    setState(() {
+      temperature = parseFloatBytes(temperatureValues);
+      humidity = parseFloatBytes(humidityValues);
+    });
     GetIt.I.get<Logger>().i("Temperature: $temperature\nHumidity: $humidity");
   }
 
@@ -92,7 +97,44 @@ class _AmbientServiceScreenState extends State<AmbientServiceScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return const Placeholder();
-  }
+  Widget build(BuildContext context) => Stack(
+        clipBehavior: Clip.none,
+        alignment: Alignment.bottomLeft,
+        children: [
+          LayoutBuilder(
+            builder: (context, constraints) => AmbientAnimation(
+              canvasSize: Size(
+                constraints.maxWidth,
+                constraints.maxHeight,
+              ),
+            ),
+          ),
+          if (temperature != null && humidity != null)
+            Padding(
+              padding: const EdgeInsets.all(32.0),
+              child: Card(
+                color: context.colors.scheme.onPrimaryContainer.withAlpha(128),
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      AmbientCharasteristicTile(
+                        value: temperature!,
+                        unit: "°C",
+                        icon: Icons.thermostat,
+                      ),
+                      AmbientCharasteristicTile(
+                        value: humidity!,
+                        unit: "%",
+                        icon: Icons.water_drop_rounded,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+        ],
+      );
 }
