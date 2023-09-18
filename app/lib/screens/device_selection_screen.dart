@@ -1,8 +1,11 @@
 import 'package:awesome_flutter_extensions/awesome_flutter_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:provider/provider.dart';
+import 'package:ratonight/provider/device_connection_provider.dart';
 import 'package:ratonight/widgets/bluetooth_device_tile.dart';
 
+/// Show a list of available devices to connect to
 class DeviceSelectionScreen extends StatefulWidget {
   const DeviceSelectionScreen({super.key});
 
@@ -36,8 +39,7 @@ class _DeviceSelectionScreenState extends State<DeviceSelectionScreen> {
               final devices = snapshot.data!
                   // Filter by Bluetooth LE and non-empty name
                   .where((element) => (element.advertisementData.connectable &&
-                      element.advertisementData.localName.isNotEmpty &&
-                      element.device.type == BluetoothDeviceType.le))
+                      element.advertisementData.localName.isNotEmpty))
                   .toList()
                 // Sort by RSSI intensity
                 ..sort(
@@ -50,6 +52,11 @@ class _DeviceSelectionScreenState extends State<DeviceSelectionScreen> {
                 separatorBuilder: (context, index) => const Divider(),
                 itemBuilder: (context, index) => BluetoothDeviceTile(
                   result: devices[index],
+                  onDeviceSelection: (device) {
+                    // Currently selected device
+                    context.read<DeviceConnectionProvider>().currentDevice =
+                        device;
+                  },
                 ),
               );
             } else {

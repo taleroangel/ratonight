@@ -1,0 +1,8 @@
+builders:
+  environmentBuilder:
+    import: "package:ratonight/builders/environment_builder.dart"
+    builder_factories: ["environmentBuilder"]
+    required_inputs: ["../environment.ini"]
+    build_extensions: { "^assets/{{}}.ini": ["lib/generated/{{}}.g.dart"] }
+    auto_apply: root_package
+    build_to: source

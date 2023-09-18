@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:ratonight/widgets/bluetooth_icon.dart';
 
+/// Show a Bluetooth logo with an alert indicating the adapter state
 class BluetoothAlertScreen extends StatelessWidget {
   const BluetoothAlertScreen(
       {required this.text,

@@ -1,13 +1,21 @@
 import 'package:awesome_flutter_extensions/awesome_flutter_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:ratonight/tools/is_valid_device.dart';
 
 class BluetoothDeviceTile extends StatelessWidget {
-  const BluetoothDeviceTile({required this.result, super.key});
+  const BluetoothDeviceTile({
+    required this.result,
+    required this.onDeviceSelection,
+    super.key,
+  });
+
   final ScanResult result;
+  final void Function(BluetoothDevice) onDeviceSelection;
 
   @override
   Widget build(BuildContext context) => ListTile(
+        enabled: isValidDevice(result),
         title: Text(result.device.localName),
         subtitle: Text(result.device.remoteId.toString()),
         leading: Column(
@@ -23,6 +31,13 @@ class BluetoothDeviceTile extends StatelessWidget {
             ),
           ],
         ),
+        trailing: isValidDevice(result)
+            ? Icon(
+                Icons.lightbulb,
+                color: context.colors.scheme.primary,
+              )
+            : null,
+        onTap: () => onDeviceSelection(result.device),
         onLongPress: () => showDialog(
           context: context,
           builder: (context) => AlertDialog(
