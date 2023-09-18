@@ -10,6 +10,11 @@
 #error "Missing environment variable ENV_DEVICE_NAME"
 #endif
 
+#ifndef ENV_DEVICE_UUID
+#define ENV_DEVICE_UUID "MISSING-ENV"
+#error "Missing environment variable ENV_DEVICE_UUID"
+#endif
+
 #ifndef ENV_SERVICES_AMBIENCE_UUID
 #define ENV_SERVICES_AMBIENCE_UUID "MISSING-ENV"
 #error "Missing environment variable ENV_SERVICES_AMBIENCE_UUID"

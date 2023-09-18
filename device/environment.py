@@ -24,6 +24,7 @@ def envstr(string):
 projenv.Append(CPPDEFINES=[
     "ENV_OK",
     ("ENV_DEVICE_NAME", envstr(envfile["device"]["name"])),
+    ("ENV_DEVICE_UUID", envstr(envfile["device"]["uuid"])),
     
     ("ENV_SERVICES_AMBIENCE_UUID", envstr(envfile["services.ambience"]["uuid"])),
     ("ENV_SERVICES_AMBIENCE_TEMPERATURE_UUID", envstr(envfile["services.ambience.temperature"]["uuid"])),

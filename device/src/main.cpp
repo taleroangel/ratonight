@@ -33,12 +33,13 @@ void setup()
 	Bluetooth::profile->set_free_heap_callback(&BluetoothCallback::on_debug_free_heap_callback);
 	Logger.log<LoggingLevel::D>("SETUP", "FREE_HEAP debug property callback initialized");
 #endif
-
+	// Fill advertising data
 	// Create the advertiser
 	Bluetooth::advertising = std::unique_ptr<BLEAdvertising>{BLEDevice::getAdvertising()};
 	// Register service into advertiser
 	Bluetooth::advertising->setAppearance(Bluetooth::LIGHT_FIXTURE_CATEGORY);
-	Bluetooth::advertising->addServiceUUID(ENV_SERVICES_AMBIENCE_TEMPERATURE_UUID);
+	Bluetooth::advertising->addServiceUUID(ENV_DEVICE_UUID);
+
 	// Start the advertisement
 	BLEDevice::startAdvertising();
 
