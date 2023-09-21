@@ -7,9 +7,10 @@
 #include <cstring>
 
 #define LIGHT_CONTROLLER_N_LIGHTS 7U
+#define LIGHT_CONTROLLER_BYTES_LIGHT 3U
+#define LIGHT_COLOR_BYTES_SIZE (LIGHT_CONTROLLER_BYTES_LIGHT * LIGHT_CONTROLLER_N_LIGHTS)
 #define INIT_VALUE 0x80000080U
 
-template <const uint8_t led_pin>
 class LightController
 {
 public:
@@ -25,65 +26,35 @@ public:
 	using led_mask = uint8_t;
 
 	/**
-	 * hsv_color struct representation type
+	 * hsv_color_mask struct representation type
 	 */
 	using hsv_color_int_type = uint32_t;
 
-private:
-	/** Inner color representation */
-	CRGB leds[n_leds];
-
 	/** Current shown color representation */
-	struct hsv_color
+	struct hsv_color_mask
 	{
 		led_mask mask = 0;
 		uint8_t hue = 0;
 		uint8_t saturation = 0;
 		uint8_t value = 0;
-	} current_color;
+	};
+
+private:
+	/** Inner color representation */
+	CRGB leds[n_leds];
 
 public:
-	inline LightController()
+	LightController() = default;
+
+	template <const uint8_t pin>
+	inline void init()
 	{
-		FastLED.addLeds<WS2812, led_pin>(leds, n_leds);
+		FastLED.addLeds<WS2812, pin>(leds, n_leds);
 	}
 
-	inline void set_color(const hsv_color_int_type binary)
-	{
-		// Dump binary contents into struct
-		std::memcpy(
-			static_cast<void *>(&current_color),
-			static_cast<const void *>(&binary),
-			sizeof(hsv_color_int_type));
-
-		// Iterate over each LED
-		for (size_t i = 0; i < n_leds; i++)
-		{
-			// Check if LED is enabled or 'global' is enabled
-			if (((current_color.mask >> i) & 1U) ||
-				(current_color.mask & 0x80U))
-			{
-				// Set the LED color
-				leds[i] = CHSV(
-					current_color.hue,
-					current_color.saturation,
-					current_color.value);
-			}
-		}
-
-		// Show Color
-		FastLED.show();
-	}
-
-	inline hsv_color_int_type get_color() const
-	{
-		union _
-		{
-			hsv_color_int_type int_type;
-			hsv_color color_type;
-		} transform{.color_type = current_color};
-		return transform.int_type;
-	}
+	void set_color(const hsv_color_int_type binary);
+	void set_color(const uint8_t p[LIGHT_COLOR_BYTES_SIZE]);
+	void get_color(uint8_t *p) const;
 };
 
 #endif

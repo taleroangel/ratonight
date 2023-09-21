@@ -13,10 +13,23 @@ void setup()
 	Peripherals::preferences.begin(ENV_DEVICE_NAME);
 	// Initialize DHT11 Peripheral
 	Peripherals::dht_sensor.begin();
-	Peripherals::light_control.set_color(
-		Peripherals::preferences.getULong(LIGHT_STORE_NAME, INIT_VALUE));
+	// Initliaze LEDS
+	Peripherals::light_control.init<GPIO_NUM_5>();
 
-	/* 1. BLE Initialization */
+/* 1. Restore contents from memory */
+#ifdef DEBUG
+	Logger.log<LoggingLevel::I>("PREFERENCES", "Preferences restored from memory");
+#endif
+	// Restore colors from LED
+	uint8_t stored_color[LIGHT_COLOR_BYTES_SIZE];
+	Peripherals::preferences.getBytes(
+		LIGHT_STORE_NAME,
+		static_cast<void *>(stored_color),
+		LIGHT_COLOR_BYTES_SIZE);
+	Peripherals::light_control.set_color(
+		static_cast<const uint8_t *>(stored_color));
+
+	/* 2. BLE Initialization */
 	// Initialize the Bluetooth device
 	BLEDevice::init(ENV_DEVICE_NAME);
 

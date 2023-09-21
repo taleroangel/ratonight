@@ -70,7 +70,7 @@ Profile::Profile(std::unique_ptr<BLEServer> &pServer)
 	light_push->addDescriptor(light_push_description.get());
 
 	light_pull_description->setUnit(NO_UNIT);
-	light_pull_description->setFormat(BLE2904::FORMAT_UINT32);
+	light_pull_description->setFormat(BLE2904::FORMAT_UINT8);
 	light_pull->addDescriptor(light_pull_description.get());
 
 #ifdef DEBUG

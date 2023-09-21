@@ -38,7 +38,7 @@ namespace Peripherals
 	/// @brief  DHT11 Sensor peripheral
 	DHT dht_sensor{GPIO_NUM_4, DHT11};
 	/// @brief	FastLED control of LEDs
-	LightController<GPIO_NUM_5> light_control{};
+	LightController light_control{};
 }
 
 namespace Bluetooth
@@ -119,13 +119,16 @@ namespace BluetoothCallback
 			Logger.log<LoggingLevel::I>("LIGHT", data_value);
 			Logger.log<LoggingLevel::I>("PREFERENCES", "Stored new value");
 #endif
-			// Store the new value
-			Peripherals::preferences.putULong(
-				LIGHT_STORE_NAME,
-				static_cast<uint32_t>(data_value));
-
 			// Set the color data
 			Peripherals::light_control.set_color(data_value);
+
+			// Store contents in preferences
+			uint8_t colors[LIGHT_COLOR_BYTES_SIZE];
+			Peripherals::light_control.get_color(colors);
+			Peripherals::preferences.putBytes(
+				LIGHT_STORE_NAME,
+				static_cast<const void *>(colors),
+				LIGHT_COLOR_BYTES_SIZE);
 		}
 	} on_light_push_callback;
 
@@ -137,12 +140,13 @@ namespace BluetoothCallback
 		void onRead(BLECharacteristic *pCharacteristic) override
 		{
 			// Grab the color
-			uint32_t colors = Peripherals::light_control.get_color();
+			uint8_t colors[LIGHT_COLOR_BYTES_SIZE];
+			Peripherals::light_control.get_color(colors);
 #ifdef DEBUG
 			Logger.log<LoggingLevel::D>("LIGHT", "Pulled value");
 #endif
 			// Set the color data
-			pCharacteristic->setValue(colors);
+			pCharacteristic->setValue(colors, LIGHT_COLOR_BYTES_SIZE);
 		}
 	} on_light_pull_callback;
 
