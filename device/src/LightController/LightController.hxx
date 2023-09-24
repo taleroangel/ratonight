@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <cstring>
 
+#define LIGHT_CONTROLLER_TYPE NEOPIXEL
 #define LIGHT_CONTROLLER_N_LIGHTS 7U
 #define LIGHT_CONTROLLER_BYTES_LIGHT 3U
 #define LIGHT_COLOR_BYTES_SIZE (LIGHT_CONTROLLER_BYTES_LIGHT * LIGHT_CONTROLLER_N_LIGHTS)
@@ -42,6 +43,7 @@ public:
 private:
 	/** Inner color representation */
 	CRGB leds[n_leds];
+	CHSV values[n_leds];
 
 public:
 	LightController() = default;
@@ -49,7 +51,7 @@ public:
 	template <const uint8_t pin>
 	inline void init()
 	{
-		FastLED.addLeds<WS2812, pin>(leds, n_leds);
+		FastLED.addLeds<LIGHT_CONTROLLER_TYPE, pin>(leds, n_leds);
 	}
 
 	void set_color(const hsv_color_int_type binary);
