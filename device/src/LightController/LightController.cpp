@@ -15,11 +15,11 @@ void LightController::set_color(const hsv_color_int_type binary)
 		sizeof(hsv_color_int_type));
 
 #ifdef DEBUG
-	Logger.log<LoggingLevel::I>("COLOR", "Color values changed");
-	Logger.log<LoggingLevel::D>("MASK", current_color.mask);
-	Logger.log<LoggingLevel::D>("HUE", current_color.hue);
-	Logger.log<LoggingLevel::D>("SAT", current_color.saturation);
-	Logger.log<LoggingLevel::D>("VAL", current_color.value);
+	Logger.log<Level::I>("COLOR", "Color values changed");
+	Logger.log<Level::D>("MASK", current_color.mask);
+	Logger.log<Level::D>("HUE", current_color.hue);
+	Logger.log<Level::D>("SAT", current_color.saturation);
+	Logger.log<Level::D>("VAL", current_color.value);
 #endif
 
 	// Iterate over each LED

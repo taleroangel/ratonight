@@ -58,7 +58,7 @@ namespace BluetoothCallback
 		void onConnect(BLEServer *pServer) override
 		{
 #ifdef DEBUG
-			Logger.log<LoggingLevel::I>("BLE", "Device connected");
+			Logger.log<Level::I>("BLE", "Device connected");
 #endif
 		};
 
@@ -66,7 +66,7 @@ namespace BluetoothCallback
 		{
 			pServer->startAdvertising();
 #ifdef DEBUG
-			Logger.log<LoggingLevel::I>("BLE", "Device disconnected");
+			Logger.log<Level::I>("BLE", "Device disconnected");
 #endif
 		}
 	} on_server_callback;
@@ -81,8 +81,8 @@ namespace BluetoothCallback
 			float temperature = Peripherals::dht_sensor.readTemperature();
 			pCharacteristic->setValue(temperature);
 #ifdef DEBUG
-			Logger.log<LoggingLevel::D>("AMBIENCE", "Requested temperature value read");
-			Logger.log<LoggingLevel::I>("AMBIENCE", temperature);
+			Logger.log<Level::D>("AMBIENCE", "Requested temperature value read");
+			Logger.log<Level::I>("AMBIENCE", temperature);
 #endif
 		}
 	} on_ambience_temperature_callback;
@@ -97,8 +97,8 @@ namespace BluetoothCallback
 			float humidity = Peripherals::dht_sensor.readHumidity();
 			pCharacteristic->setValue(humidity);
 #ifdef DEBUG
-			Logger.log<LoggingLevel::D>("AMBIENCE", "Requested humidity value read");
-			Logger.log<LoggingLevel::I>("AMBIENCE", humidity);
+			Logger.log<Level::D>("AMBIENCE", "Requested humidity value read");
+			Logger.log<Level::I>("AMBIENCE", humidity);
 #endif
 		}
 	} on_ambience_humidity_callback;
@@ -115,9 +115,9 @@ namespace BluetoothCallback
 			for (size_t i = 0; i < pCharacteristic->getLength(); i++)
 				data_value |= pCharacteristic->getData()[i] << (8 * i);
 #ifdef DEBUG
-			Logger.log<LoggingLevel::D>("LIGHT", "Pushed value");
-			Logger.log<LoggingLevel::I>("LIGHT", data_value);
-			Logger.log<LoggingLevel::I>("PREFERENCES", "Stored new value");
+			Logger.log<Level::D>("LIGHT", "Pushed value");
+			Logger.log<Level::I>("LIGHT", data_value);
+			Logger.log<Level::I>("PREFERENCES", "Stored new value");
 #endif
 			// Set the color data
 			Peripherals::light_control.set_color(data_value);
@@ -143,7 +143,7 @@ namespace BluetoothCallback
 			uint8_t colors[LIGHT_COLOR_BYTES_SIZE];
 			Peripherals::light_control.get_color(colors);
 #ifdef DEBUG
-			Logger.log<LoggingLevel::D>("LIGHT", "Pulled value");
+			Logger.log<Level::D>("LIGHT", "Pulled value");
 #endif
 			// Set the color data
 			pCharacteristic->setValue(colors, LIGHT_COLOR_BYTES_SIZE);
@@ -160,7 +160,7 @@ namespace BluetoothCallback
 			// Store the value
 			pCharacteristic->setValue(free_heap);
 			// Logger value
-			Logger.log<LoggingLevel::D>("FREE_HEAP", free_heap);
+			Logger.log<Level::D>("FREE_HEAP", free_heap);
 		}
 	} on_debug_free_heap_callback;
 
@@ -173,7 +173,7 @@ namespace BluetoothCallback
 			// Store the value
 			pCharacteristic->setValue(min_heap);
 			// Logger value
-			Logger.log<LoggingLevel::D>("MIN_HEAP", min_heap);
+			Logger.log<Level::D>("MIN_HEAP", min_heap);
 		}
 	} on_debug_min_heap_callback;
 #endif

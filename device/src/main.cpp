@@ -5,8 +5,8 @@ void setup()
 	// Serial on debug mode
 #ifdef DEBUG
 	Serial.begin(SERIAL_BAUD_RATE);
-	Logger.begin(&Serial, LoggingLevel::ALL);
-	Logger.log<LoggingLevel::I>("LOGGER", "Logger is Running (DEBUG is ON)");
+	Logger.begin(&Serial, Level::ALL);
+	Logger.log<Level::I>("LOGGER", "Logger is Running (DEBUG is ON)");
 #endif
 	/* 0. Peripheral initialization */
 	// Initialize the memory
@@ -18,7 +18,7 @@ void setup()
 
 /* 1. Restore contents from memory */
 #ifdef DEBUG
-	Logger.log<LoggingLevel::I>("PREFERENCES", "Preferences restored from memory");
+	Logger.log<Level::I>("PREFERENCES", "Preferences restored from memory");
 #endif
 	// Restore colors from LED
 	uint8_t stored_color[LIGHT_COLOR_BYTES_SIZE];
@@ -46,7 +46,7 @@ void setup()
 #ifdef DEBUG
 	Bluetooth::profile->set_free_heap_callback(&BluetoothCallback::on_debug_free_heap_callback);
 	Bluetooth::profile->set_min_heap_callback(&BluetoothCallback::on_debug_min_heap_callback);
-	Logger.log<LoggingLevel::D>("SETUP", "DEBUG property callback initialized");
+	Logger.log<Level::D>("SETUP", "DEBUG property callback initialized");
 #endif
 	// Fill advertising data
 	// Create the advertiser
@@ -59,7 +59,7 @@ void setup()
 	BLEDevice::startAdvertising();
 
 #ifdef DEBUG
-	Logger.log<LoggingLevel::D>("SETUP", "Finished device initialization");
+	Logger.log<Level::D>("SETUP", "Finished device initialization");
 #endif
 }
 
