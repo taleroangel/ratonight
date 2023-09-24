@@ -34,4 +34,16 @@ class LightServiceUtils {
         mapValues(color.saturation, 0.0, 1.0, 0, 255).toInt(),
         mapValues(color.value, 0.0, 1.0, 0, 255).toInt(),
       ];
+
+  static Color averageColor(List<HSVColor> hsvColors) => HSVColor.fromAHSV(
+        1.0,
+        hsvColors.map((hsvColor) => hsvColor.hue).reduce((a, b) => a + b) /
+            hsvColors.length,
+        hsvColors
+                .map((hsvColor) => hsvColor.saturation)
+                .reduce((a, b) => a + b) /
+            hsvColors.length,
+        hsvColors.map((hsvColor) => hsvColor.value).reduce((a, b) => a + b) /
+            hsvColors.length,
+      ).toColor();
 }

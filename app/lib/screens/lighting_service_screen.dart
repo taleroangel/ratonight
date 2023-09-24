@@ -6,6 +6,7 @@ import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 import 'package:ratonight/environment.g.dart';
 import 'package:ratonight/exceptions/characteristic_exception.dart';
+import 'package:ratonight/provider/application_color_provider.dart';
 import 'package:ratonight/provider/device_connection_provider.dart';
 import 'package:ratonight/tools/light_service_utils.dart';
 import 'package:ratonight/widgets/color_container.dart';
@@ -30,6 +31,9 @@ class _LightingServiceScreenState extends State<LightingServiceScreen> {
   /// Select all colors as if they where one
   bool selectColorsIndividually = false;
 
+  // Should animate the transition
+  bool shouldAnimateTransition = false;
+
   /// Previous color for undo action
   List<HSVColor>? previousColor;
 
@@ -40,7 +44,7 @@ class _LightingServiceScreenState extends State<LightingServiceScreen> {
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      GetIt.I.get<Logger>().d("Created: $runtimeType");
+      GetIt.I.get<Logger>().t("Created: $runtimeType");
 
       // Request the bluetooth device
       device = context.read<DeviceConnectionProvider>().currentDevice!;
@@ -63,20 +67,22 @@ class _LightingServiceScreenState extends State<LightingServiceScreen> {
             EnvironmentUuid.servicesLightPull.uuid,
       );
 
-      // Get the content
-      pullContent();
+      // Get the content and set application color
+      pullContent().then((value) => context
+          .read<ApplicationColorProvider>()
+          .color = LightServiceUtils.averageColor(colors!));
     });
     super.initState();
   }
 
   @override
   void dispose() {
-    GetIt.I.get<Logger>().d("Destroyed: $runtimeType");
+    GetIt.I.get<Logger>().t("Destroyed: $runtimeType");
     super.dispose();
   }
 
   /// Fetch the color content from the device
-  void pullContent() async {
+  Future<void> pullContent() async {
     try {
       // Get bytes from the device
       final bytes = await pullCharacteristic.read();
@@ -85,8 +91,8 @@ class _LightingServiceScreenState extends State<LightingServiceScreen> {
       // Transform bytes into colors
       GetIt.I.get<Logger>().d("Pulled values (bytes): $bytes");
       final hslcolors = LightServiceUtils.bytesToColors(bytes);
-
       GetIt.I.get<Logger>().d("Pulled values (hsl): $hslcolors");
+
       // Set content
       setState(() {
         // New colors
@@ -111,7 +117,7 @@ class _LightingServiceScreenState extends State<LightingServiceScreen> {
   Future<void> pushContent() async {
     GetIt.I
         .get<Logger>()
-        .d("Selected color value: ${colors![currentlySelectedColorIndex]}");
+        .t("Selected color value: ${colors![currentlySelectedColorIndex]}");
 
     // Get the color bytes
     final bytes = LightServiceUtils.colorsToByte(!selectColorsIndividually,
@@ -139,12 +145,18 @@ class _LightingServiceScreenState extends State<LightingServiceScreen> {
 
     // Create a copy of state
     previousColor = List.unmodifiable(colors!);
+
+    // Set application color
+    context.read<ApplicationColorProvider>().color =
+        LightServiceUtils.averageColor(colors!);
   }
 
   /// Call when value is changed
   void onColorChangeCallback(HSVColor color) {
     // Set new application state
     setState(() {
+      // Do not animate transition
+      shouldAnimateTransition = false;
       if (selectColorsIndividually) {
         // Set the individual color
         colors![currentlySelectedColorIndex] = color;
@@ -153,6 +165,28 @@ class _LightingServiceScreenState extends State<LightingServiceScreen> {
         colors = List.filled(colors!.length, color);
       }
     });
+  }
+
+  void reduceLevel() {
+    GetIt.I.get<Logger>().i("LIGHT OFF - Reduce Level");
+    // Reduce the Value of every color
+    setState(() {
+      shouldAnimateTransition = true;
+      colors = colors!.map((e) => e.withValue(0.0)).toList();
+    });
+    // Push changes
+    pushContent();
+  }
+
+  void increaseLevel() {
+    GetIt.I.get<Logger>().i("LIGHT ON - Increase Level");
+    // Reduce the Value of every color
+    setState(() {
+      shouldAnimateTransition = true;
+      colors = colors!.map((e) => e.withValue(1.0)).toList();
+    });
+    // Push changes
+    pushContent();
   }
 
   @override
@@ -165,7 +199,7 @@ class _LightingServiceScreenState extends State<LightingServiceScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // selectColorsIndividually toggle button
+                // Actions bar
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
@@ -178,7 +212,7 @@ class _LightingServiceScreenState extends State<LightingServiceScreen> {
                         // Set individual value
                         selectColorsIndividually = value;
                       }),
-                    ),
+                    )
                   ],
                 ),
                 Column(
@@ -200,6 +234,9 @@ class _LightingServiceScreenState extends State<LightingServiceScreen> {
                               .asMap()
                               .entries
                               .map((e) => ColorContainer(
+                                    animationLength:
+                                        shouldAnimateTransition ? 400 : 0,
+                                    key: ValueKey(e.key),
                                     color: e.value.toColor(),
                                     selected: (e.key ==
                                             currentlySelectedColorIndex) &&
@@ -217,10 +254,23 @@ class _LightingServiceScreenState extends State<LightingServiceScreen> {
                     ),
                     Padding(
                       padding: const EdgeInsets.only(top: 24.0),
-                      child: FilledButton.icon(
-                        onPressed: () => pushContent(), // Push to device
-                        icon: const Icon(Icons.light),
-                        label: const Text("Update"),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          IconButton.filledTonal(
+                            onPressed: () => reduceLevel(),
+                            icon: const Icon(Icons.lightbulb_outline),
+                          ),
+                          FilledButton.icon(
+                            onPressed: () => pushContent(), // Push to device
+                            icon: const Icon(Icons.light),
+                            label: const Text("Update"),
+                          ),
+                          IconButton.filledTonal(
+                            onPressed: () => increaseLevel(),
+                            icon: const Icon(Icons.lightbulb),
+                          ),
+                        ],
                       ),
                     ),
                   ],

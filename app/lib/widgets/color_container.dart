@@ -11,17 +11,20 @@ class ColorContainer extends StatelessWidget {
     required this.color,
     required this.onTap,
     required this.selected,
+    this.animationLength = 0,
     super.key,
   });
 
   final Color color;
   final void Function() onTap;
   final bool selected;
+  final int animationLength;
 
   @override
   Widget build(BuildContext context) => GestureDetector(
         onTap: onTap,
-        child: Container(
+        child: AnimatedContainer(
+          duration: Duration(milliseconds: animationLength),
           height: itemSize,
           width: itemSize,
           decoration: BoxDecoration(

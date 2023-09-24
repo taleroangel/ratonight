@@ -53,7 +53,7 @@ class _AmbientServiceScreenState extends State<AmbientServiceScreen> {
   void initState() {
     // Request when contect is available
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      GetIt.I.get<Logger>().d("Created: $runtimeType");
+      GetIt.I.get<Logger>().t("Created: $runtimeType");
       // Request the bluetooth device
       device = context.read<DeviceConnectionProvider>().currentDevice!;
 
@@ -90,7 +90,7 @@ class _AmbientServiceScreenState extends State<AmbientServiceScreen> {
 
   @override
   void dispose() {
-    GetIt.I.get<Logger>().d("Destroyed: $runtimeType");
+    GetIt.I.get<Logger>().t("Destroyed: $runtimeType");
     // Cancel the timer
     requestTimer.cancel();
     super.dispose();

@@ -27,6 +27,7 @@ class _MainScreenState extends State<MainScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
         title: Text(device.localName),
         actions: [
           Padding(
@@ -43,7 +44,7 @@ class _MainScreenState extends State<MainScreen> {
               ),
               onPressed: () => device.disconnect(),
             ),
-          )
+          ),
         ],
       ),
       body: Center(
