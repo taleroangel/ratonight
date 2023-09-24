@@ -214,6 +214,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.15.7"
+  flutter_hsvcolor_picker:
+    dependency: "direct main"
+    description:
+      name: flutter_hsvcolor_picker
+      sha256: ea5868dbb1c840ef502bbf60168b26e18eab13a3a2b07bfef0c59a64e7fedc2c
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.5.0"
   flutter_lints:
     dependency: "direct dev"
     description:
@@ -291,6 +299,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
+  intl:
+    dependency: transitive
+    description:
+      name: intl
+      sha256: "3bc132a9dbce73a7e4a21a17d06e1878839ffbf975568bc875c60537824b0c4d"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.18.1"
   io:
     dependency: transitive
     description:
@@ -475,6 +491,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.3"
+  screwdriver:
+    dependency: "direct main"
+    description:
+      name: screwdriver
+      sha256: "2d385651be2d3acbc6024e1d8926d89df8424a02d9d850df7f708a2745b581c2"
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.2.1"
   shelf:
     dependency: transitive
     description:
@@ -618,4 +642,4 @@ packages:
     version: "3.1.2"
 sdks:
   dart: ">=3.1.2 <4.0.0"
-  flutter: ">=2.8.0"
+  flutter: ">=2.10.0"

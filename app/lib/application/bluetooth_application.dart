@@ -3,7 +3,7 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:ratonight/application/bluetooth_state_builder.dart';
 import 'package:ratonight/application/connection_state_builder.dart';
 import 'package:ratonight/screens/bluetooth_alert_screen.dart';
-import 'package:ratonight/tools/request_bluetooth_permissions.dart';
+import 'package:ratonight/tools/request_permissions.dart';
 
 class BluetoothApplication extends StatefulWidget {
   const BluetoothApplication({super.key});
@@ -19,7 +19,7 @@ class _BluetoothApplicationState extends State<BluetoothApplication> {
   @override
   void initState() {
     // Initialize asking for permissions
-    permissions = requestBluetoothPermissions();
+    permissions = requestPermissions();
     super.initState();
   }
 
