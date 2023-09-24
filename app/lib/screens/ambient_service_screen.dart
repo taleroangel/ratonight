@@ -97,44 +97,49 @@ class _AmbientServiceScreenState extends State<AmbientServiceScreen> {
   }
 
   @override
-  Widget build(BuildContext context) => Stack(
-        clipBehavior: Clip.none,
-        alignment: Alignment.bottomLeft,
-        children: [
-          LayoutBuilder(
-            builder: (context, constraints) => AmbientAnimation(
-              canvasSize: Size(
-                constraints.maxWidth,
-                constraints.maxHeight,
-              ),
-            ),
-          ),
-          if (temperature != null && humidity != null)
-            Padding(
-              padding: const EdgeInsets.all(32.0),
-              child: Card(
-                color: context.colors.scheme.onPrimaryContainer.withAlpha(128),
-                child: Padding(
-                  padding: const EdgeInsets.all(24.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      AmbientCharasteristicTile(
-                        value: temperature!,
-                        unit: "°C",
-                        icon: Icons.thermostat,
-                      ),
-                      AmbientCharasteristicTile(
-                        value: humidity!,
-                        unit: "%",
-                        icon: Icons.water_drop_rounded,
-                      ),
-                    ],
+  Widget build(BuildContext context) =>
+      (temperature == null || humidity == null)
+          ? const Center(child: CircularProgressIndicator())
+          : Stack(
+              clipBehavior: Clip.none,
+              alignment: Alignment.bottomLeft,
+              children: [
+                LayoutBuilder(
+                  builder: (context, constraints) => AmbientAnimation(
+                    humidity: humidity!,
+                    temperature: temperature!,
+                    canvasSize: Size(
+                      constraints.maxWidth,
+                      constraints.maxHeight,
+                    ),
                   ),
                 ),
-              ),
-            ),
-        ],
-      );
+                Padding(
+                  padding: const EdgeInsets.all(32.0),
+                  child: Card(
+                    color:
+                        context.colors.scheme.onPrimaryContainer.withAlpha(128),
+                    child: Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          AmbientCharasteristicTile(
+                            value: temperature!,
+                            unit: "°C",
+                            icon: Icons.thermostat,
+                          ),
+                          AmbientCharasteristicTile(
+                            value: humidity!,
+                            unit: "%",
+                            icon: Icons.water_drop_rounded,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            );
 }
