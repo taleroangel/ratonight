@@ -15,8 +15,7 @@ class AmbientAnimation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    //final currentDate = DayMoment.fromDateTime(DateTime.now());
-    final currentDate = DayMoment.night;
+    final currentDate = DayMoment.fromDateTime(DateTime.now());
 
     /// Wrapper
     return WrapperScene(
@@ -51,14 +50,14 @@ class AmbientAnimation extends StatelessWidget {
       },
       children: switch (currentDate) {
         DayMoment.morning || DayMoment.afternoon => [
-            if (humidity > 50.0)
+            if (humidity > 70.0)
               const RainWidget(
                 rainConfig: RainConfig(color: Colors.blue),
               ),
             if (temperature > 20.0) const SunWidget() else const CloudWidget(),
           ],
         DayMoment.evening || DayMoment.night => [
-            if (humidity > 50.0)
+            if (humidity > 70.0)
               const RainWidget(
                 rainConfig: RainConfig(color: Colors.blue),
               ),

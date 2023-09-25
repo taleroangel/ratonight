@@ -8,4 +8,4 @@ Future<bool> requestPermissions() async => (await [
       Permission.bluetoothScan
     ].request())
         .values
-        .every((element) => element.isGranted);
+        .every((element) => element.isGranted || element.isProvisional);

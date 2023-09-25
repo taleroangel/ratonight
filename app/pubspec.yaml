@@ -22,6 +22,8 @@ dependencies:
   permission_handler: ^11.0.0
   flutter_blue_plus: ^1.15.7
   weather_animation: ^0.0.2
+  flutter_native_splash: ^2.3.2
+  url_launcher: ^6.1.14
   
 dev_dependencies:
   flutter_test:
@@ -29,6 +31,24 @@ dev_dependencies:
 
   flutter_lints: ^2.0.0
   build_runner: ^2.4.6
+  flutter_launcher_icons: ^0.13.1
 
 flutter:
   uses-material-design: true
+
+  assets:
+    - "assets/icon.png"
+
+flutter_native_splash:
+  color: "#9141AC"
+  image: "assets/icon.png"
+
+flutter_launcher_icons:
+  android: true
+  linux: true
+
+  image_path: "assets/icon.png"
+  background_color: "#9141AC"
+
+  adaptive_icon_foreground: "assets/padding.png"
+  adaptive_icon_background: "#9141AC"

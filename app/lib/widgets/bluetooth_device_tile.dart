@@ -20,11 +20,13 @@ class BluetoothDeviceTile extends StatelessWidget {
         subtitle: Text(result.device.remoteId.toString()),
         leading: Column(
           children: [
-            Icon(switch (result.rssi) {
-              > -60 => Icons.wifi_rounded,
-              > -70 => Icons.wifi_2_bar_rounded,
-              _ => Icons.wifi_1_bar_rounded,
-            }),
+            Expanded(
+              child: Icon(switch (result.rssi) {
+                > -60 => Icons.wifi_rounded,
+                > -70 => Icons.wifi_2_bar_rounded,
+                _ => Icons.wifi_1_bar_rounded,
+              }),
+            ),
             Text(
               "${result.rssi}\nRSSI",
               textAlign: TextAlign.center,

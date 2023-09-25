@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:ratonight/provider/device_connection_provider.dart';
+import 'package:ratonight/screens/about_screen.dart';
 import 'package:ratonight/widgets/bluetooth_device_tile.dart';
 
 /// Show a list of available devices to connect to
@@ -28,8 +29,12 @@ class _DeviceSelectionScreenState extends State<DeviceSelectionScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(
-          title: const Text("Device connection"),
+        appBar: AppBar(title: const Text("Device connection")),
+        floatingActionButton: FloatingActionButton(
+          child: const Icon(Icons.help),
+          onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) => const AboutScreen(),
+          )),
         ),
         body: StreamBuilder(
           stream: FlutterBluePlus.scanResults,
