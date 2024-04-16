@@ -8,12 +8,18 @@ class DeviceConnectionProvider extends ChangeNotifier {
   Future<void> connectionRequestFinished = Future.value();
 
   /// Stores the current device services
-  Future<List<BluetoothService>>? deviceServices;
+  Future<List<BluetoothService>>? get deviceServices =>
+      currentDevice?.discoverServices()
+        ?..then((value) {
+          GetIt.I.get<Logger>().i("${value.length} services where discovered");
+        }).catchError((error) {
+          GetIt.I.get<Logger>().e("Error during service discovery: $error");
+        });
 
   /// Currently selected device
   BluetoothDevice? _currentDevice;
-
   BluetoothDevice? get currentDevice => _currentDevice;
+
   set currentDevice(BluetoothDevice? device) {
     // If new device is null, try disconnect first
     if (device == null) {
@@ -25,16 +31,6 @@ class DeviceConnectionProvider extends ChangeNotifier {
     if (_currentDevice != null) {
       // Connect to the device
       connectionRequestFinished = _currentDevice!.connect()
-        // Discover services when connected
-        ..then((value) => deviceServices = _currentDevice!.discoverServices()
-          // Discover services logging
-          ..then((value) {
-            GetIt.I
-                .get<Logger>()
-                .i("${value.length} services where discovered");
-          }).catchError((error) {
-            GetIt.I.get<Logger>().e("Error during service discovery: $error");
-          }))
         // Log values when connected
         ..then((_) {
           GetIt.I.get<Logger>().i("Connected to device");
@@ -46,4 +42,7 @@ class DeviceConnectionProvider extends ChangeNotifier {
     }
     notifyListeners();
   }
+
+  /// Disconnec thte current device
+  void disconnect() async => await currentDevice?.disconnect();
 }

@@ -1,20 +1,25 @@
 #include "setup.hxx"
+#include <pinout.hxx>
 
 void setup()
 {
 	// Serial on debug mode
 #ifdef DEBUG
 	Serial.begin(SERIAL_BAUD_RATE);
+	// Enable de Logger
 	Logger.begin(&Serial, Level::ALL);
 	Logger.log<Level::I>("LOGGER", "Logger is Running (DEBUG is ON)");
 #endif
 	/* 0. Peripheral initialization */
+	// Delay execution in order for peripherals to be ready
+	delay(INITIAL_DELAY_MS);
+
 	// Initialize the memory
 	Peripherals::preferences.begin(ENV_DEVICE_NAME);
 	// Initialize DHT11 Peripheral
 	Peripherals::dht_sensor.begin();
 	// Initliaze LEDS
-	Peripherals::light_control.init<GPIO_NUM_5>();
+	Peripherals::light_control.init<pinout::hw_159_data>();
 
 /* 1. Restore contents from memory */
 #ifdef DEBUG

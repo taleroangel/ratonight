@@ -51,18 +51,24 @@ class _AmbientServiceScreenState extends State<AmbientServiceScreen> {
 
   @override
   void initState() {
-    // Request when contect is available
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // Request when content is available
       GetIt.I.get<Logger>().t("Created: $runtimeType");
-      // Request the bluetooth device
-      device = context.read<DeviceConnectionProvider>().currentDevice!;
+
+      // Get the device
+      final provider = context.read<DeviceConnectionProvider>();
+      device = provider.currentDevice!;
 
       // Request the service
-      ambienceService = device.servicesList!.firstWhere(
+      ambienceService = (await provider.deviceServices)!.firstWhere(
         (service) =>
             service.serviceUuid.toString() ==
             EnvironmentUuid.servicesAmbience.uuid,
       );
+
+      GetIt.I.get<Logger>().d(
+            "AmbienceService characteristics: ${device.servicesList}",
+          );
 
       // Request the temperature
       temperatureCharacteristic = ambienceService.characteristics.firstWhere(
@@ -85,6 +91,7 @@ class _AmbientServiceScreenState extends State<AmbientServiceScreen> {
         (_) => request(),
       );
     });
+
     super.initState();
   }
 

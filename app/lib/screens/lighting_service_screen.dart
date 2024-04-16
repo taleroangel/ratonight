@@ -34,23 +34,27 @@ class _LightingServiceScreenState extends State<LightingServiceScreen> {
   // Should animate the transition
   bool shouldAnimateTransition = false;
 
-  /// Previous color for undo action
-  List<HSVColor>? previousColor;
-
   /// Current colors being shown in the device
   List<HSVColor>? colors;
+
+  void syncColorWithApplication() {
+    // Set the application color
+    context.read<ApplicationColorProvider>().color =
+        LightServiceUtils.averageColor(colors!);
+  }
 
   /// Fetch the Bluetooth initial data
   @override
   void initState() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       GetIt.I.get<Logger>().t("Created: $runtimeType");
 
-      // Request the bluetooth device
-      device = context.read<DeviceConnectionProvider>().currentDevice!;
+      // Get the device
+      final provider = context.read<DeviceConnectionProvider>();
+      device = provider.currentDevice!;
 
       // Request the service
-      lightService = device.servicesList!.firstWhere((service) =>
+      lightService = (await provider.deviceServices)!.firstWhere((service) =>
           service.serviceUuid.toString() == EnvironmentUuid.servicesLight.uuid);
 
       // Request the push characteristic
@@ -67,11 +71,10 @@ class _LightingServiceScreenState extends State<LightingServiceScreen> {
             EnvironmentUuid.servicesLightPull.uuid,
       );
 
-      // Get the content and set application color
-      pullContent().then((value) => context
-          .read<ApplicationColorProvider>()
-          .color = LightServiceUtils.averageColor(colors!));
+      // Get the content and set the color
+      pullContent();
     });
+
     super.initState();
   }
 
@@ -95,6 +98,8 @@ class _LightingServiceScreenState extends State<LightingServiceScreen> {
 
       // Set content
       setState(() {
+        // Create animation for new value
+        shouldAnimateTransition = true;
         // New colors
         colors = hslcolors;
         // If all colors are equial set 'selectColorsIndividually' to false
@@ -102,15 +107,15 @@ class _LightingServiceScreenState extends State<LightingServiceScreen> {
           (element) => (element == colors!.first),
         ));
       });
-      // Store previous colors
-      previousColor = List.unmodifiable(colors!);
     } on FlutterBluePlusException catch (_) {
       // On characteristic read throw an exception
       throw CharacteristicException(
-          device: device,
+          device: null,
           characteristic: pullCharacteristic,
           message: "During 'pullContent' on $runtimeType");
     }
+
+    syncColorWithApplication();
   }
 
   /// Push values into device
@@ -119,44 +124,60 @@ class _LightingServiceScreenState extends State<LightingServiceScreen> {
         .get<Logger>()
         .t("Selected color value: ${colors![currentlySelectedColorIndex]}");
 
-    // Get the color bytes
-    final bytes = LightServiceUtils.colorsToByte(!selectColorsIndividually,
-        currentlySelectedColorIndex, colors![currentlySelectedColorIndex]);
+    // If every color is the same then apply to all elements
+    if (colors!.every((element) => element == colors!.first)) {
+      // Get the color bytes
+      final bytes = LightServiceUtils.colorsToByte(true,
+          currentlySelectedColorIndex, colors![currentlySelectedColorIndex]);
 
-    try {
-      // Push the value to device
-      pushCharacteristic.write(bytes);
-      GetIt.I.get<Logger>().i("Pushed light values to device");
-    } on FlutterBluePlusException catch (_) {
-      // On characteristic read throw an exception
-      throw CharacteristicException(
-          device: device,
-          characteristic: pullCharacteristic,
-          message: "During 'pushContent' on $runtimeType");
+      try {
+        // Push the value to device
+        await pushCharacteristic.write(bytes);
+        GetIt.I.get<Logger>().i("Pushed light values to device");
+      } on FlutterBluePlusException catch (_) {
+        // On characteristic read throw an exception
+        throw CharacteristicException(
+            device: null,
+            characteristic: pullCharacteristic,
+            message: "During 'pushContent' on $runtimeType");
+      }
+    } else {
+      // Push every value to the device
+      try {
+        // Push the value to device
+        await Future.wait(colors!.asMap().map((index, color) {
+          // Get the color bytes
+          final bytes = LightServiceUtils.colorsToByte(
+            false,
+            index,
+            color,
+          );
+
+          // Return the bytes
+          return MapEntry(index, pushCharacteristic.write(bytes));
+        }).values);
+
+        GetIt.I.get<Logger>().i("Pushed light values to device");
+      } on FlutterBluePlusException catch (_) {
+        // On characteristic read throw an exception
+        throw CharacteristicException(
+            device: null,
+            characteristic: pullCharacteristic,
+            message: "During 'pushContent' on $runtimeType");
+      }
     }
 
-    // Update if no change was prompted
-    if (!selectColorsIndividually) {
-      setState(() {
-        // Set the individual color
-        colors = List.filled(colors!.length, colors!.first);
-      });
-    }
-
-    // Create a copy of state
-    previousColor = List.unmodifiable(colors!);
-
-    // Set application color
-    context.read<ApplicationColorProvider>().color =
-        LightServiceUtils.averageColor(colors!);
+    syncColorWithApplication();
   }
 
   /// Call when value is changed
   void onColorChangeCallback(HSVColor color) {
     // Set new application state
     setState(() {
-      // Do not animate transition
+      // Do not animate transition (causes lag)
       shouldAnimateTransition = false;
+
+      // Change the actual color
       if (selectColorsIndividually) {
         // Set the individual color
         colors![currentlySelectedColorIndex] = color;
@@ -167,134 +188,147 @@ class _LightingServiceScreenState extends State<LightingServiceScreen> {
     });
   }
 
+  /// Turn off the light
   void reduceLevel() {
     GetIt.I.get<Logger>().i("LIGHT OFF - Reduce Level");
     // Reduce the Value of every color
     setState(() {
       shouldAnimateTransition = true;
-      colors = colors!.map((e) => e.withValue(0.0)).toList();
+      selectColorsIndividually = false;
+      colors = List.filled(
+        colors!.length,
+        colors![currentlySelectedColorIndex].withValue(0.0),
+      );
     });
+
     // Push changes
     pushContent();
   }
 
+  /// Turn on the light to maximum levels
   void increaseLevel() {
     GetIt.I.get<Logger>().i("LIGHT ON - Increase Level");
     // Reduce the Value of every color
     setState(() {
       shouldAnimateTransition = true;
-      colors = colors!.map((e) => e.withValue(1.0)).toList();
+      selectColorsIndividually = false;
+      colors = List.filled(
+        colors!.length,
+        colors![currentlySelectedColorIndex].withValue(1.0),
+      );
     });
     // Push changes
     pushContent();
   }
 
   @override
-  Widget build(BuildContext context) => (colors == null)
-      ? const Center(child: CircularProgressIndicator())
-      : Center(
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Actions bar
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const Text("Select individually"),
-                    Switch(
-                      value: selectColorsIndividually,
-                      onChanged: (value) => setState(() {
-                        // Undo previous actions
-                        colors = List.from(previousColor!);
-                        // Set individual value
-                        selectColorsIndividually = value;
-                      }),
-                    )
-                  ],
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // Colors indicators
-                    Container(
-                      decoration: const BoxDecoration(
-                        color: Colors.black12,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Flow(
-                          delegate: ColorFlowDelegate(
-                            childCount: colors!.length,
+  Widget build(BuildContext context) {
+    return (colors == null)
+        ? const Center(child: CircularProgressIndicator())
+        : Center(
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Select individually toggle
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const Text("Select individually"),
+                      Switch(
+                        value: selectColorsIndividually,
+                        onChanged: (value) => setState(
+                          () => (selectColorsIndividually = value),
+                        ),
+                      )
+                    ],
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      // Colors indicators
+                      Container(
+                        decoration: const BoxDecoration(
+                          color: Colors.black12,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Flow(
+                            delegate: ColorFlowDelegate(
+                              childCount: colors!.length,
+                            ),
+                            children: colors!
+                                .asMap()
+                                .entries
+                                .map((e) => ColorContainer(
+                                      animationLength:
+                                          shouldAnimateTransition ? 400 : 0,
+                                      key: ValueKey(e.key),
+                                      color: e.value.toColor(),
+                                      selected: (e.key ==
+                                              currentlySelectedColorIndex) &&
+                                          selectColorsIndividually,
+                                      onTap: () => setState(() {
+                                        // Set the current index
+                                        currentlySelectedColorIndex = e.key;
+                                      }),
+                                    ))
+                                .toList(),
                           ),
-                          children: colors!
-                              .asMap()
-                              .entries
-                              .map((e) => ColorContainer(
-                                    animationLength:
-                                        shouldAnimateTransition ? 400 : 0,
-                                    key: ValueKey(e.key),
-                                    color: e.value.toColor(),
-                                    selected: (e.key ==
-                                            currentlySelectedColorIndex) &&
-                                        selectColorsIndividually,
-                                    onTap: () => setState(() {
-                                      // Undo previous actions
-                                      colors = List.from(previousColor!);
-                                      // Set the current index
-                                      currentlySelectedColorIndex = e.key;
-                                    }),
-                                  ))
-                              .toList(),
                         ),
                       ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 24.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          IconButton.filledTonal(
-                            onPressed: () => reduceLevel(),
-                            icon: const Icon(Icons.lightbulb_outline),
-                          ),
-                          FilledButton.icon(
-                            onPressed: () => pushContent(), // Push to device
-                            icon: const Icon(Icons.light),
-                            label: const Text("Update"),
-                          ),
-                          IconButton.filledTonal(
-                            onPressed: () => increaseLevel(),
-                            icon: const Icon(Icons.lightbulb),
-                          ),
-                        ],
+                      // Action buttons
+                      Padding(
+                        padding: const EdgeInsets.only(top: 24.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            IconButton.filledTonal(
+                              onPressed: () => reduceLevel(),
+                              icon: const Icon(Icons.lightbulb_outline),
+                            ),
+                            IconButton.filled(
+                              onPressed: () => pullContent(),
+                              icon: const Icon(Icons.replay_rounded),
+                            ),
+                            FilledButton.icon(
+                              onPressed: () => pushContent(), // Push to device
+                              icon: const Icon(Icons.light),
+                              label: const Text("Update"),
+                            ),
+                            IconButton.filledTonal(
+                              onPressed: () => increaseLevel(),
+                              icon: const Icon(Icons.lightbulb),
+                            ),
+                          ],
+                        ),
                       ),
+                    ],
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 32.0,
                     ),
-                  ],
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 32.0,
+                    child: HSVPicker(
+                      color: colors![currentlySelectedColorIndex],
+                      onChanged: (value) {
+                        // Set the new color
+                        onColorChangeCallback(value);
+                      },
+                    ),
                   ),
-                  child: HSVPicker(
-                    color: colors![currentlySelectedColorIndex],
-                    onChanged: (value) {
-                      // Set the new color
-                      onColorChangeCallback(value);
-                    },
-                  ),
-                ),
-              ]
-                  // Wrap every widget in a padding
-                  .map((e) => Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: e,
-                      ))
-                  .toList(),
+                ]
+                    // Wrap every widget in a padding
+                    .map((e) => Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: e,
+                        ))
+                    .toList(),
+              ),
             ),
-          ),
-        );
+          );
+  }
 }

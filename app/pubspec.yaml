@@ -2,53 +2,70 @@ name: ratonight
 description: Smart camping night-light control application
 
 publish_to: "none"
-version: 1.0.0+1
+version: 1.0.0
 
 environment:
-  sdk: ">=3.1.2 <4.0.0"
+  sdk: ">=3.3.3 <4.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
 
+  # For dependency injection
   get_it: ^7.6.4
+  # For state management
   provider: ^6.0.5
-  build: ^2.4.1
+  # Parsing environment.ini file with UUID definitions
   ini: ^2.1.0
+  # Custom builder for building dynamic asssets and configurations
+  build: ^2.4.1
+  # Structured logging
   logger: ^2.0.2
-
+  # Additional QoL tools
   awesome_flutter_extensions: ^1.1.1
+  # Color picker for lamp color
   flutter_hsvcolor_picker: ^1.5.0
+  # Handle bluetooth permissions
   permission_handler: ^11.0.0
+  # Bluetooth handler for communicating for device
   flutter_blue_plus: ^1.15.7
+  # Weather animation in temperature screen
   weather_animation: ^0.0.2
+  # Application loading animation
   flutter_native_splash: ^2.3.2
+  # About page - link to GitHub
   url_launcher: ^6.1.14
   
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  flutter_lints: ^2.0.0
+  flutter_lints: ^3.0.2
+  # Build time runners
   build_runner: ^2.4.6
-  flutter_launcher_icons: ^0.13.1
+  # Generate application icon
+  icons_launcher: ^2.1.7
 
 flutter:
   uses-material-design: true
 
   assets:
     - "assets/icon.png"
+    - "assets/padding.png"
+    - "assets/ratonight.svg.vec"
+    - "assets/environment.ini"
 
 flutter_native_splash:
+
   color: "#9141AC"
-  image: "assets/icon.png"
+  image: "assets/padding.png"
+  
 
-flutter_launcher_icons:
-  android: true
-  linux: true
-
+icons_launcher:
   image_path: "assets/icon.png"
-  background_color: "#9141AC"
-
-  adaptive_icon_foreground: "assets/padding.png"
-  adaptive_icon_background: "#9141AC"
+  platforms:
+    android:
+      enable: true
+      image_path: "assets/icon.png"
+      adaptive_background_color: "#9141AC"
+      adaptive_foreground_image: "assets/padding.png"

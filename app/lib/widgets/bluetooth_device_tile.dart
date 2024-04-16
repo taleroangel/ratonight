@@ -16,7 +16,7 @@ class BluetoothDeviceTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) => ListTile(
         enabled: isValidDevice(result),
-        title: Text(result.device.localName),
+        title: Text(result.device.platformName),
         subtitle: Text(result.device.remoteId.toString()),
         leading: Column(
           children: [
@@ -43,7 +43,7 @@ class BluetoothDeviceTile extends StatelessWidget {
         onLongPress: () => showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            title: Text(result.device.localName),
+            title: Text(result.device.platformName),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [

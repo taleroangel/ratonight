@@ -44,7 +44,7 @@ class _DeviceSelectionScreenState extends State<DeviceSelectionScreen> {
               final devices = snapshot.data!
                   // Filter by Bluetooth LE and non-empty name
                   .where((element) => (element.advertisementData.connectable &&
-                      element.advertisementData.localName.isNotEmpty))
+                      element.advertisementData.advName.isNotEmpty))
                   .toList()
                 // Sort by RSSI intensity
                 ..sort(

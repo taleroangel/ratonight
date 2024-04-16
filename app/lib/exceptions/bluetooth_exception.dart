@@ -8,10 +8,10 @@ class BluetoothException extends IOException {
     required this.message,
   }) : super();
 
-  final BluetoothDevice device;
+  final BluetoothDevice? device;
   final String message;
 
   @override
   String toString() =>
-      "$runtimeType: on device '${device.localName}', message: $message\nDevice: $device";
+      "$runtimeType: on device '${device?.platformName ?? "unknown"}', message: $message\nDevice: $device";
 }

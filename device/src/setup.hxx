@@ -10,6 +10,7 @@
 // Global Imports
 #include <environment.h>
 #include <settings.h>
+#include <pinout.hxx>
 
 // Libraries
 #include <BLEDevice.h>
@@ -36,7 +37,7 @@ namespace Peripherals
 	/// @brief Across reboots preferences
 	Preferences preferences;
 	/// @brief  DHT11 Sensor peripheral
-	DHT dht_sensor{GPIO_NUM_4, DHT11};
+	DHT dht_sensor{pinout::dht_data, DHT11};
 	/// @brief	FastLED control of LEDs
 	LightController light_control{};
 }

@@ -7,13 +7,17 @@ import 'package:ratonight/application/bluetooth_application.dart';
 import 'package:ratonight/provider/application_color_provider.dart';
 import 'package:ratonight/provider/device_connection_provider.dart';
 
-void main() {
+void main() async {
   // Dependency injection registration
   GetIt.I.registerSingleton<Logger>(
     Logger(
         printer: kDebugMode ? PrettyPrinter() : SimplePrinter(),
         level: kDebugMode ? Level.all : Level.info),
   );
+
+  await GetIt.I.allReady();
+
+  GetIt.I.get<Logger>().i("Application started successfully");
 
   // Run the application
   runApp(MultiProvider(

@@ -13,4 +13,8 @@
 #define NUM_LEDS 7
 #endif
 
+#ifndef INITIAL_DELAY_MS
+#define INITIAL_DELAY_MS 1500
+#endif
+
 #endif

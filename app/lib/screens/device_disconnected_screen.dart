@@ -38,8 +38,8 @@ class DeviceDisconnectedScreen extends StatelessWidget {
                             padding: const EdgeInsets.all(16.0),
                             child: Text(
                               snapshot.connectionState == ConnectionState.done
-                                  ? "Not connected to ${currentDevice.localName}"
-                                  : "Connecting to ${currentDevice.localName}",
+                                  ? "Not connected to ${currentDevice.platformName}"
+                                  : "Connecting to ${currentDevice.platformName}",
                               style: context.themes.text.headlineLarge,
                               textAlign: TextAlign.center,
                             ),
